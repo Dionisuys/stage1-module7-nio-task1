@@ -21,30 +21,29 @@ public class FileReader {
     private Map<String, String> readProfileData(File file) {
         Map<String, String> profileData = new HashMap<>();
         try {
-            // Создаем канал для чтения файла
-            FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ);
-            // Создаем буфер для хранения данных
-            ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
-            // Читаем данные из канала в буфер
-            channel.read(buffer);
-            // Переводим буфер в режим чтения
-            buffer.flip();
-            // Создаем декодер для преобразования байтов в символы
-            CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
-            // Декодируем данные из буфера в символьный поток
-            CharBuffer charBuffer = decoder.decode(buffer);
-            // Закрываем канал
-            channel.close();
-            // Разбиваем символьный поток на строки по символу перевода строки
-            String[] lines = charBuffer.toString().split("\n");
-            // Обрабатываем каждую строку
-            for (String line : lines) {
-                // Разбиваем строку на ключ и значение по символу двоеточия
-                String[] keyValue = line.split(":");
-                if (keyValue.length == 2) {
-                    String key = keyValue[0].trim();
-                    String value = keyValue[1].trim();
-                    profileData.put(key, value);
+            // Создаем канал для чтения файла с помощью try-with-resources
+            try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)) {
+                // Создаем буфер для хранения данных
+                ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+                // Читаем данные из канала в буфер
+                channel.read(buffer);
+                // Переводим буфер в режим чтения
+                buffer.flip();
+                // Создаем декодер для преобразования байтов в символы
+                CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+                // Декодируем данные из буфера в символьный поток
+                CharBuffer charBuffer = decoder.decode(buffer);
+                // Разбиваем символьный поток на строки по символу перевода строки
+                String[] lines = charBuffer.toString().split("\n");
+                // Обрабатываем каждую строку
+                for (String line : lines) {
+                    // Разбиваем строку на ключ и значение по символу двоеточия
+                    String[] keyValue = line.split(":");
+                    if (keyValue.length == 2) {
+                        String key = keyValue[0].trim();
+                        String value = keyValue[1].trim();
+                        profileData.put(key, value);
+                    }
                 }
             }
         } catch (IOException e) {
